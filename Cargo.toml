@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 cpal = "0.15.3"
+midir = "0.10.0"
 rand = "0.8.5"
