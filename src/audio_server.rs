@@ -47,7 +47,7 @@ impl AudioServer {
                     }
 
                     // add
-                    while let Some(synth) = synth.next() {
+                    for synth in synth {
                         synth.write_to_buffer(data, false);
                     }
 

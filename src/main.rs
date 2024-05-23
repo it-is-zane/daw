@@ -12,7 +12,7 @@ fn main() {
 
         synths.push(Box::new(synths::Noise::new()));
 
-        for freq in vec![32.7032, 41.20344, 48.99943, 439.0, 523.2511, 659.2551] {
+        for freq in [32.7032, 41.20344, 48.99943, 439.0, 523.2511, 659.2551] {
             synths.push(Box::new(synths::SinWave::new(freq, &server.config)));
         }
     }
