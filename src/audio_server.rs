@@ -6,7 +6,7 @@ pub trait Synth {
 }
 
 pub struct AudioServer {
-    pub synths: Arc<Mutex<Vec<Box<dyn Synth + Send + Sync>>>>,
+    pub events: Arc<Mutex<Vec<AudioEvent>>>,
     stream: cpal::Stream,
     pub config: cpal::StreamConfig,
 }
@@ -29,31 +29,37 @@ impl AudioServer {
 
         let config = supported_config.config();
 
-        let synths: Arc<Mutex<Vec<Box<dyn Synth + Send + Sync>>>> =
-            Arc::new(Mutex::new(Vec::new()));
-
-        let synths_copy = synths.clone();
+        let events = Arc::new(Mutex::new(Vec::<AudioEvent>::new()));
+        let events_clone = events.clone();
 
         let stream = device
             .build_output_stream(
                 &config,
                 move |data: &mut [f32], _| {
-                    let mut synths = synths_copy.lock().unwrap();
-                    let mut synth = synths.iter_mut();
+                    let mut events = events_clone.lock().unwrap();
+
+                    // remove finished events
+                    if let Some(index) = events
+                        .iter()
+                        .enumerate()
+                        .find_map(|(i, e)| e.done.then_some(i))
+                    {
+                        events.swap_remove(index);
+                    }
+
+                    let mut events = events.iter_mut();
 
                     // initialize
-                    if let Some(synth) = synth.next() {
-                        synth.write_to_buffer(data, true);
+                    if let Some(event) = events.next() {
+                        event.write_to_buffer(data, true);
+                    } else {
+                        data.fill(0.0);
                     }
 
                     // add
-                    for synth in synth {
-                        synth.write_to_buffer(data, false);
+                    for event in events {
+                        event.write_to_buffer(data, false);
                     }
-
-                    // normalize
-                    data.iter_mut()
-                        .for_each(|value| *value /= synths.len() as f32);
                 },
                 move |err| eprintln!("{err}"),
                 None,
@@ -63,9 +69,63 @@ impl AudioServer {
         stream.play().unwrap();
 
         AudioServer {
-            synths,
+            events,
             stream,
             config,
         }
+    }
+}
+
+pub struct AudioEvent {
+    pub freq: f32,
+    amp: f32,
+    config: cpal::StreamConfig,
+    clock: f32,
+    pub released: bool,
+    pub done: bool,
+}
+
+impl AudioEvent {
+    pub fn new(freq: f32, amp: f32, config: cpal::StreamConfig) -> Self {
+        Self {
+            freq,
+            amp,
+            config,
+            clock: 0.0,
+            released: false,
+            done: false,
+        }
+    }
+
+    fn write_to_buffer(&mut self, buffer: &mut [f32], garbage: bool) {
+        let time_constant = std::f32::consts::TAU / self.config.sample_rate.0 as f32;
+
+        let mut value_calc = || {
+            if self.released {
+                self.amp -= time_constant * 0.1;
+
+                if self.amp <= 0.0 {
+                    self.amp = 0.0;
+                    self.done = true;
+                }
+            }
+
+            self.clock = (self.clock + 1.0) % (self.config.sample_rate.0 as f32 / self.freq);
+            self.amp * (self.clock * self.freq * time_constant).sin()
+        };
+
+        if garbage {
+            for value in buffer.iter_mut() {
+                *value = value_calc();
+            }
+        } else {
+            for value in buffer.iter_mut() {
+                *value += value_calc();
+            }
+        }
+    }
+
+    pub fn release(&mut self) {
+        self.released = true;
     }
 }
