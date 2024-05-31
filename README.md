@@ -20,3 +20,8 @@
   - Project recovery
   - Reverting decisions
   - Colaberation
+- Apple
+  - Form can be more importaint than function
+    - Fast software can feel slugish, and vice versa. **Responsivness** is very importaint for users.
+      - "I'm getting a narcissistic injury when the world is ignoring me." - Gabe Newell
+    - How something feels matters to users. If you are going to be using something often you want it to be pleasent to use.
