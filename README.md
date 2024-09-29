@@ -1,5 +1,10 @@
 # daw
-
+<!--
+1. melody, harmony, and rhythm
+2. form, tempo, and dynamics
+dsp = https://www.ling.upenn.edu/courses/Spring_2023/ling2250/Moore1978Part1.pdf
+dsp = http://msp.ucsd.edu/techniques/latest/book.pdf
+-->
 ## Current State
 - Not at all complete. Currently comprised of audio experiments.
 
