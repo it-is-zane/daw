@@ -5,8 +5,9 @@
 dsp = https://www.ling.upenn.edu/courses/Spring_2023/ling2250/Moore1978Part1.pdf
 dsp = http://msp.ucsd.edu/techniques/latest/book.pdf
 -->
+
 ## Current State
-- Not at all complete. Currently comprised of audio experiments.
+- Not at all complete. Currently comprised of audio/midi experiments.
 
 ## Why
 - I want to learn low level apliaction development and thought a daw would be a good project to align my tinkering.
@@ -30,3 +31,13 @@ dsp = http://msp.ucsd.edu/techniques/latest/book.pdf
     - Fast software can feel slugish, and vice versa. **Responsivness** is very importaint for users.
       - "I'm getting a narcissistic injury when the world is ignoring me." - Gabe Newell
     - How something feels matters to users. If you are going to be using something often you want it to be pleasent to use.
+
+## Build & Run
+Prerequisites: Rust toolchain (rustup.rs)
+
+Platform Notes: Was built and tested on Linux.
+```bash
+git clone https://github.com/it-is-zane/zgpu
+cd zgpu
+cargo run
+```
